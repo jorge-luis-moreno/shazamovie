@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommender SPA</title>
+    <!-- Bootstrap CSS for layout/styling if needed, but going with Tailwind via CDN is faster and easier for premium look -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/static/css/style.css" rel="stylesheet">
+    <style>
+        /* Custom styles on top of tailwind */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .animate-fade {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .view-section {
+            display: none;
+        }
+        .view-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen">
+    <nav class="sticky top-0 z-50 glass border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🎬</span>
+                    <span class="font-bold text-xl tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">ShazaMovies</span>
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="ui.loadView('home')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white transition-colors">🏠 Home</button>
+                    <button onclick="ui.loadView('recommend')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white transition-colors">🎯 Recommend</button>
+                    <button onclick="ui.loadView('categories')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white transition-colors">📁 Categories</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <main id="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade">
+        <!-- Home View -->
+        <section id="view-home" class="view-section active space-y-8">
+            <div class="text-center py-12 px-4 sm:px-6 lg:px-8 glass rounded-2xl">
+                <h1 class="text-5xl font-extrabold tracking-tight mb-4">Discover Your Next Favorite Movie</h1>
+                <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-8">Let our recommendation engine find the perfect film based on your unique tastes.</p>
+                <div class="flex justify-center gap-4">
+                    <button onclick="ui.loadView('recommend')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-105 shadow-lg shadow-blue-500/30">Get Recommendations</button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Random Movie -->
+                <div class="glass p-6 rounded-2xl relative overflow-hidden group">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center justify-between">Featured Random<button onclick="app.loadRandomMovie()" class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition">↻ Refresh</button></h2>
+                    <div id="random-movie-container" class="min-h-[200px] flex items-center justify-center">
+                        <!-- Filled via JS -->
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="glass p-6 rounded-2xl flex flex-col justify-center">
+                    <h2 class="text-2xl font-bold mb-6">System Stats</h2>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="bg-gray-800 p-4 rounded-xl">
+                            <div id="stat-movies" class="text-4xl font-black text-blue-400 mb-1">-</div>
+                            <div class="text-sm text-gray-400 uppercase tracking-widest">Movies</div>
+                        </div>
+                        <div class="bg-gray-800 p-4 rounded-xl">
+                            <div id="stat-genres" class="text-4xl font-black text-purple-400 mb-1">-</div>
+                            <div class="text-sm text-gray-400 uppercase tracking-widest">Genres</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h2 class="text-2xl font-bold mb-4">Latest Additions</h2>
+                <div id="latest-movies-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+            </div>
+        </section>
+
+        <!-- Recommend View -->
+        <section id="view-recommend" class="view-section space-y-8">
+            <div class="glass p-8 rounded-2xl text-center">
+                <h2 class="text-3xl font-bold mb-2">Build Your Perfect Night In</h2>
+                <p class="text-gray-400 mb-6">Select genres you're in the mood for.</p>
+                
+                <div id="genre-picker" class="flex flex-wrap justify-center gap-3 mb-8">
+                    <!-- Checkboxes filled via JS -->
+                </div>
+                
+                <button onclick="app.getRecommendations()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-105 shadow-lg shadow-purple-500/30">Find Movies</button>
+            </div>
+            
+            <div id="recommend-results" class="hidden">
+                 <h2 class="text-2xl font-bold mb-6 border-b border-gray-700 pb-2">Results <span id="results-count" class="text-sm font-normal text-gray-400 ml-2"></span></h2>
+                 
+                 <div id="featured-recommendation" class="mb-10 text-center glass rounded-2xl overflow-hidden shadow-2xl shadow-purple-900/20 max-w-3xl mx-auto">
+                     <!-- Featured Card JS -->
+                 </div>
+                 
+                 <h3 class="text-xl font-semibold mb-4 text-gray-300">Other Matches</h3>
+                 <div id="recommend-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6"></div>
+            </div>
+        </section>
+
+        <!-- Categories View -->
+        <section id="view-categories" class="view-section space-y-12">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold">Browse By Genre</h2>
+            </div>
+            <div id="categories-container" class="space-y-12">
+                <!-- Accordion/Sections filled via JS -->
+            </div>
+        </section>
+        
+    </main>
+    
+    <!-- Movie Modal -->
+    <div id="movieModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-black/80 backdrop-blur-sm transition-opacity">
+        <div class="glass max-w-2xl w-full rounded-2xl overflow-hidden shadow-2xl relative transform transition-all scale-95 opacity-0" id="modal-content-wrapper">
+            <button onclick="ui.closeModal()" class="absolute top-4 right-4 bg-gray-800 hover:bg-red-600 hover:text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors z-10">&times;</button>
+            <div id="modal-content" class="p-0">
+                <!-- JS populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all z-50 border border-gray-600">
+        <span id="toast-message">Message</span>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
