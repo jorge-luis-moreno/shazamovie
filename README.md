@@ -4,6 +4,14 @@ A single-page application built with Django REST Framework, MongoDB, and Vanilla
 
 ## Setup Instructions
 
+**MUST DO THIS**
+Run it inside the terminal of the project.
+```bash
+python -m venv venv
+```
+```bash
+.\venv\Scripts\activate
+```
 1. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
